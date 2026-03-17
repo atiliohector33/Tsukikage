@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Ranking } from './components/Ranking'
 
 const ENTRIES = [
