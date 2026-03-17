@@ -1,5 +1,5 @@
-import type { RankingProps } from "./ranking.types";
-import { sortByScore, getMedal } from "./ranking.utils";
+import type { RankingProps } from "../types/ranking.types";
+import { sortByScore, getMedal } from "../utils/ranking.utils";
 import styles from "./Ranking.module.css";
 
 export function Ranking({ entries, title, scoreLabel = "pts" }: RankingProps) {

@@ -1,4 +1,4 @@
-import type { RankingEntry } from "./ranking.types";
+import type { RankingEntry } from "../types/ranking.types";
 
 export const sortByScore = (entries: RankingEntry[]) =>
   [...entries].sort((a, b) => b.score - a.score);

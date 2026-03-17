@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Ranking } from './Ranking'
+import { Ranking } from './components/Ranking'
 
 const ENTRIES = [
-  { id: 1, label: "Ana Lima", score: 9840 },
-  { id: 2, label: "Carlos Mota", score: 7200 },
-  { id: 3, label: "Beatriz Faro", score: 6800 },
+  { id: 1, label: "Hector", score: 9840 },
+  { id: 2, label: "Alex Poatan", score: 7200 },
+  { id: 3, label: "Jon Jones", score: 6800 },
 ]
 
 
