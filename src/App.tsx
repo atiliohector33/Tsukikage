@@ -7,12 +7,21 @@ const ENTRIES = [
 ]
 
 
-function App() {
 
+function App() {
   return (
-    <>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "20px",
+      flexWrap: "wrap",
+      background: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
+      padding: "20px"
+    }}>
       <Ranking entries={ENTRIES} title="Ranking" scoreLabel="pts" />
-    </>
+    </div>
   )
 }
 

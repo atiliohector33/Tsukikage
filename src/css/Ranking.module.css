@@ -1,13 +1,35 @@
 .wrapper {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+}
+
+.container {
   width: 100%;
-  max-width: 400px;
-  font-family: inherit;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.15);
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin-bottom: 18px;
+  text-align: center;
+  color: #5b21b6;
+  position: relative;
+}
+
+.title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #7c3aed;
+  margin: 8px auto 0;
+  border-radius: 999px;
 }
 
 .list {
@@ -16,35 +38,54 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: background 0.15s;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-4px) scale(1.01);
+  background: #f3f0ff;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+  z-index: 2;
+}
+
+.item:nth-child(1) {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+}
+
+.item:nth-child(2) {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+}
+
+.item:nth-child(3) {
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff);
 }
 
 .position {
   min-width: 28px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #7c3aed;
   text-align: center;
 }
 
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,6 +93,7 @@
   font-weight: 700;
   flex-shrink: 0;
   overflow: hidden;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
 }
 
 .avatar img {
@@ -62,19 +104,20 @@
 
 .label {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  color: #2e1065;
 }
 
 .score {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #4f46e5;
+  color: #7c3aed;
 }
 
 .scoreUnit {
   font-size: 0.7rem;
   font-weight: 400;
   opacity: 0.6;
-  margin-left: 2px;
+  margin-left: 3px;
 }
