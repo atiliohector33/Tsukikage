@@ -23,7 +23,7 @@ export function RankingItem({ entry, position, scoreLabel }: RankingItemProps) {
       <span className={styles.label}>{entry.label}</span>
 
       <span className={styles.score}>
-        {entry.score.toLocaleString("pt-BR")}
+        {entry.score.toLocaleString("en-US")}
         <span className={styles.scoreUnit}>{scoreLabel}</span>
       </span>
     </li>
