@@ -10,3 +10,9 @@ export interface RankingProps {
   title?: string;
   scoreLabel?: string;
 }
+
+export type RankingItemProps = {
+  entry: RankingEntry;
+  position: number;
+  scoreLabel: string;
+};
