@@ -6,7 +6,7 @@ const ENTRIES = [
   { id: 3, label: "Jon Jones", score: 6800 },
 ]
 
-function App() {
+function Tsukikage() {
   return (
     <div style={{
       minHeight: "100vh",
@@ -27,4 +27,4 @@ function App() {
   )
 }
 
-export default App
+export default Tsukikage
