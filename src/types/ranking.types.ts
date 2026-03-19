@@ -5,10 +5,12 @@ export interface RankingEntry {
   avatar?: string;
 }
 
+export type ScoreType = 1 | 2 | 3;
+
 export interface RankingProps {
   entries: RankingEntry[];
   title?: string;
-  scoreLabel?: string;
+  scoreType?: ScoreType;
 }
 
 export type RankingItemProps = {

@@ -6,8 +6,6 @@ const ENTRIES = [
   { id: 3, label: "Jon Jones", score: 6800 },
 ]
 
-
-
 function App() {
   return (
     <div style={{
@@ -20,7 +18,7 @@ function App() {
       background: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
       padding: "20px"
     }}>
-      <Ranking entries={ENTRIES} title="Ranking" scoreLabel="pts" />
+      <Ranking entries={ENTRIES} title="Ranking" scoreType={1}/>
     </div>
   )
 }
