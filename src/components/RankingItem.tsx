@@ -6,12 +6,13 @@ export function RankingItem({
   entry,
   position,
   scoreLabel,
+  isHighlighted,
 }: RankingItemProps) {
   const medal = getMedal(position);
   const initials = entry.label.slice(0, 2).toUpperCase();
 
   return (
-    <li className={`${styles.item}`}>
+    <li className={`${styles.item} ${isHighlighted ? styles.highlight : ""}`}>
       <span className={styles.position}>
         {medal ?? `#${position}`}
       </span>

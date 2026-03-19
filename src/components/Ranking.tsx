@@ -13,6 +13,7 @@ export function Ranking({
   entries,
   title,
   scoreType = 1,
+  highlightFn,
 }: RankingProps) {
   const sorted = sortByScore(entries);
   const scoreLabel = SCORE_LABELS[scoreType];
@@ -23,14 +24,21 @@ export function Ranking({
         {title && <h2 className={styles.title}>{title}</h2>}
 
         <ol className={styles.list}>
-          {sorted.map((entry, index) => (
-            <RankingItem
-              key={entry.id}
-              entry={entry}
-              position={index + 1}
-              scoreLabel={scoreLabel}
-            />
-          ))}
+          {sorted.map((entry, index) => {
+            const isHighlighted = highlightFn
+              ? highlightFn(entry, index)
+              : false;
+
+            return (
+              <RankingItem
+                key={entry.id}
+                entry={entry}
+                position={index + 1}
+                scoreLabel={scoreLabel}
+                isHighlighted={isHighlighted}
+              />
+            );
+          })}
         </ol>
       </div>
     </div>

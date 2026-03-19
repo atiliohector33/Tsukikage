@@ -18,7 +18,11 @@ function App() {
       background: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
       padding: "20px"
     }}>
-      <Ranking entries={ENTRIES} title="Ranking" scoreType={1}/>
+      <Ranking
+        entries={ENTRIES}
+        title="Ranking"
+        highlightFn={(entry) => entry.score > 9000}
+      />
     </div>
   )
 }
