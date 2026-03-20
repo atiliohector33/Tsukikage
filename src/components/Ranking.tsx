@@ -1,5 +1,6 @@
 import type { RankingProps, ScoreType } from "../types/ranking.types";
 import { sortByScore } from "../utils/ranking.utils";
+// @ts-ignore: CSS module without type declarations
 import styles from "../css/Ranking.module.css";
 import { RankingItem } from "./RankingItem";
 
