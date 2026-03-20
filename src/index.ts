@@ -1,6 +1,6 @@
 // Components
-export { Ranking } from "./src/components/Ranking";
-export { RankingItem } from "./src/components/RankingItem";
+export { Ranking } from "./components/Ranking";
+export { RankingItem } from "./components/RankingItem";
 
 // Types — re-exported so consumers get full TypeScript support
 export type {
@@ -8,7 +8,7 @@ export type {
   RankingProps,
   RankingItemProps,
   ScoreType,
-} from "./src/types/ranking.types";
+} from "./types/ranking.types";
 
 // Utils — optional, export only if you want consumers to use them
-export { getMedal, sortByScore, createSorter } from "./src/utils/ranking.utils";
+export { getMedal, sortByScore, createSorter } from "./utils/ranking.utils";
