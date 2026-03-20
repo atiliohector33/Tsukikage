@@ -12,6 +12,7 @@ export interface RankingProps {
   title?: string;
   scoreType?: ScoreType;
   highlightFn?: (entry: RankingEntry, index: number) => boolean;
+  limit?: number;
 }
 
 export type RankingItemProps = {

@@ -14,8 +14,14 @@ export function Ranking({
   title,
   scoreType = 1,
   highlightFn,
+  limit,
 }: RankingProps) {
   const sorted = sortByScore(entries);
+
+  const visibleEntries = limit
+    ? sorted.slice(0, limit)
+    : sorted;
+
   const scoreLabel = SCORE_LABELS[scoreType];
 
   return (
@@ -24,7 +30,7 @@ export function Ranking({
         {title && <h2 className={styles.title}>{title}</h2>}
 
         <ol className={styles.list}>
-          {sorted.map((entry, index) => {
+          {visibleEntries.map((entry, index) => {
             const isHighlighted = highlightFn
               ? highlightFn(entry, index)
               : false;
