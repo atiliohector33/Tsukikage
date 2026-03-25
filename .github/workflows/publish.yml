@@ -25,14 +25,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Bump version
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version patch -m "chore: bump version to %s [skip ci]"
-          git push origin main --follow-tags
-
       - name: Publish
-        run: npm publish
+        run: npm publish || echo "Version already published, skipping."
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
