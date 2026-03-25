@@ -12,23 +12,25 @@ export const getMedal = (position: number): string | null => {
 
 type SortOptions = {
   secondaryKey?: keyof RankingEntry;
+  order?: "asc" | "desc";
 };
 
 export const sortByScore = (
   entries: RankingEntry[],
   options?: SortOptions
 ): RankingEntry[] => {
-  const { secondaryKey } = options || {};
+  const { secondaryKey, order = "desc" } = options || {};
 
   return [...entries].sort((a, b) => {
-    const scoreDiff = b.score - a.score;
+    const scoreDiff = order === "desc"
+      ? b.score - a.score
+      : a.score - b.score;
 
     if (scoreDiff !== 0) return scoreDiff;
 
     if (secondaryKey) {
       const aValue = a[secondaryKey];
       const bValue = b[secondaryKey];
-
       if (aValue != null && bValue != null) {
         return String(aValue).localeCompare(String(bValue));
       }
