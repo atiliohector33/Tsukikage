@@ -39,12 +39,13 @@ That's where we're going. We're just getting started.
 
 ---
 
-## What's here today (v0.1) ✅
+## What's here today (v0.2) ✅
 
 | Decorator | What it does |
 |-----------|-------------|
 | `@timer` | Measures execution time with nanosecond precision. Tracks avg, min, max, and percentiles across calls. |
 | `@timeout` | Kills a function if it takes too long. Works with sync and async. Raises `TimeoutExpired`. |
+| `@profile` | All-in-one snapshot: wall time, CPU time, memory delta, memory peak, and thread count. |
 
 ---
 
@@ -277,9 +278,148 @@ except TimeoutExpired as e:
 
 ---
 
+## `@profile` — The full picture in one decorator 📊
+
+When `@timer` isn't enough and you need to know *why* something is slow.
+
+### Basic usage
+
+```python
+from tsukikage import profile
+
+@profile
+def build_report(rows: list[dict]) -> bytes:
+    data = [transform(r) for r in rows]
+    return serialize(data)
+
+build_report(my_rows)
+```
+
+**Output (pretty mode, default):**
+```
+╭─ 📊  __main__.build_report ─────────────────╮
+│  duration      87.412 ms                      │
+│  cpu time      84.103 ms                      │
+│  memory delta  +4.21 MB                       │
+│  memory peak   6.88 MB                        │
+│  threads       4 → 4                          │
+│  calls         1                              │
+╰──────────────────────────────────────────────╯
+```
+
+Call it multiple times and you get averages too:
+
+```
+╭─ 📊  __main__.build_report ─────────────────╮
+│  duration      91.003 ms                      │
+│  cpu time      88.441 ms                      │
+│  memory delta  +4.33 MB                       │
+│  memory peak   6.92 MB                        │
+│  threads       4 → 4                          │
+│  calls         5                              │
+│  ─────────────────────────────────────────── │
+│  avg duration  89.214 ms                      │
+│  avg cpu       86.782 ms                      │
+╰──────────────────────────────────────────────╯
+```
+
+---
+
+### Output modes
+
+**simple** — one line with all metrics:
+
+```python
+@profile(mode="simple", label="etl.transform")
+def transform(df): ...
+```
+```
+[profile] etl.transform  duration=87.412ms  cpu=84.103ms  mem=+4.21MB  peak=6.88MB  threads=4→4  calls=1
+```
+
+---
+
+**json** — structured output for log aggregators and dashboards:
+
+```python
+@profile(mode="json", label="ml.inference")
+def predict(features): ...
+```
+```json
+{
+  "name": "ml.inference",
+  "calls": 3,
+  "duration_ms": 87.412,
+  "cpu_ms": 84.103,
+  "memory_delta_bytes": 4415488,
+  "memory_peak_bytes": 7216128,
+  "threads_before": 4,
+  "threads_after": 4,
+  "avg_duration_ms": 86.891,
+  "avg_cpu_ms": 83.644
+}
+```
+
+---
+
+### Inspect snapshots programmatically
+
+```python
+@profile(label="db.migrate")
+def run_migration(): ...
+
+run_migration()
+
+stats = run_migration.stats()
+snap = stats.last             # most recent ProfileSnapshot
+
+snap.duration_ns              # wall time in nanoseconds
+snap.cpu_ns                   # CPU time (user + kernel), excludes sleep
+snap.memory_delta_bytes       # bytes allocated during the call
+snap.memory_peak_bytes        # peak Python-level memory during the call
+snap.threads_before           # active threads before the call
+snap.threads_after            # active threads after the call
+
+stats.avg_duration_ns         # average across all calls
+stats.avg_cpu_ns
+stats.avg_memory_delta_bytes
+
+run_migration.reset()         # clear accumulated snapshots
+```
+
+> **Memory note:** measured via `tracemalloc` — Python-level allocations only.
+> C extensions (NumPy, Pandas internals) are not tracked.
+> CPU time uses `time.process_time_ns()` and excludes `time.sleep()`.
+
+---
+
+### Works with async too
+
+```python
+@profile(label="api.fetch_all")
+async def fetch_all(ids: list[int]) -> list[dict]:
+    return await asyncio.gather(*[fetch(i) for i in ids])
+```
+
+---
+
+### Use cases for `@profile`
+
+| Scenario | Why it helps |
+|----------|-------------|
+| Memory leak investigation | Watch `memory_delta_bytes` grow across calls |
+| CPU vs I/O bound analysis | High `duration`, low `cpu_ns` → you're waiting on I/O |
+| Data pipeline tuning | See exactly which step allocates the most memory |
+| ML inference profiling | Track CPU and memory per batch |
+| Concurrency debugging | Thread count changing unexpectedly? Now you'll know. |
+
+---
+
 ## How it works under the hood 🔧
 
 - **`@timer`** uses `time.perf_counter_ns()` for nanosecond precision. Stats are stored in a thread-safe singleton registry, so they accumulate correctly even in multi-threaded apps.
+
+- **`@profile`** combines `time.perf_counter_ns()` for wall time, `time.process_time_ns()` for CPU time, `tracemalloc` for memory, and `threading.active_count()` for threads. Zero extra dependencies — all stdlib.
 
 - **`@timeout`** on Unix/macOS uses `SIGALRM` — which actually interrupts the function mid-execution. On Windows or from a worker thread, it falls back to `concurrent.futures` (the function finishes in the background, but your code moves on).
 
@@ -287,20 +427,23 @@ except TimeoutExpired as e:
 
 ## Roadmap
 
-### v0.1 (now)
+### v0.1 ✅
 - [x] `@timer` — execution time, stats, percentiles, 3 output modes
 - [x] `@timeout` — sync + async, SIGALRM on Unix, thread fallback
 
-### v0.2
+### v0.2 ✅ (current)
+- [x] `@profile` — wall time, CPU time, memory delta/peak, thread count
+
+### v0.3
 - [ ] `@retry` — attempts, delay, exponential backoff, jitter
-- [ ] `@log` — the main decorator. Args, return value, exceptions, duration
+- [ ] `@log` — the main decorator. Args, return value, exceptions, duration, memory
 - [ ] `@trace` — auto call tree: `main → auth → db → save`
 - [ ] `@debug` — dev-mode decorator showing args, return, file + line
 
-### v0.3
+### v0.4
 - [ ] `@cache` — in-memory and disk, with TTL
-- [ ] `@profile` — time + memory + CPU in one shot
-- [ ] `@memory` — peak memory usage
+- [ ] `@memory` — isolated memory measurement decorator
+- [ ] `@count_calls` — call counter with reset
 
 ### v1.0
 - [ ] `@notify` — send alerts to Slack, Discord, or Telegram on failure
