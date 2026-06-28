@@ -89,3 +89,25 @@ class ProfileStats:
     @property
     def avg_memory_delta_bytes(self) -> float | None:
         return _avg([s.memory_delta_bytes for s in self.snapshots])
+
+
+# ---------------------------------------------------------------------------
+# Debug models
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class DebugRecord:
+    """Single-call record produced by @debug."""
+
+    name: str
+    file: str
+    line: int
+    args_repr: dict[str, str]
+    return_repr: str | None
+    exception_repr: str | None
+    duration_ns: int
+
+    @property
+    def raised(self) -> bool:
+        return self.exception_repr is not None
