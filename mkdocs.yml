@@ -1,8 +1,8 @@
 site_name: Tsukikage
 site_description: One decorator. Total visibility.
-site_url: https://thehecktour.github.io/Tsukikage
-repo_url: https://github.com/thehecktour/Tsukikage
-repo_name: thehecktour/Tsukikage
+site_url: https://atiliohector33.github.io/Tsukikage
+repo_url: https://github.com/atiliohector33/Tsukikage
+repo_name: atiliohector33/Tsukikage
 
 theme:
   name: material

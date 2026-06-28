@@ -592,7 +592,7 @@ async def broadcast(message: str, room_id: int) -> int:
 This project is in early development. Ideas, bug reports, and PRs are very welcome.
 
 ```bash
-git clone https://github.com/thehecktour/tsukikage
+git clone https://github.com/atiliohector33/tsukikage
 cd tsukikage
 poetry install
 poetry run pytest
