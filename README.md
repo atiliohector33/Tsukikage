@@ -39,13 +39,14 @@ That's where we're going. We're just getting started.
 
 ---
 
-## What's here today (v0.2) ✅
+## What's here today (v0.3) ✅
 
 | Decorator | What it does |
 |-----------|-------------|
 | `@timer` | Measures execution time with nanosecond precision. Tracks avg, min, max, and percentiles across calls. |
 | `@timeout` | Kills a function if it takes too long. Works with sync and async. Raises `TimeoutExpired`. |
 | `@profile` | All-in-one snapshot: wall time, CPU time, memory delta, memory peak, and thread count. |
+| `@debug` | Dev-mode inspector: shows arguments, return value, exceptions, source location, and duration on every call. |
 
 ---
 
@@ -415,11 +416,133 @@ async def fetch_all(ids: list[int]) -> list[dict]:
 
 ---
 
+## `@debug` — See inside every call 🐛
+
+The best friend of a developer who just wants to know *what is going in and out* of a function, without adding a bunch of print statements.
+
+### Basic usage
+
+```python
+from tsukikage import debug
+
+@debug
+def create_user(name: str, role: str = "viewer") -> dict:
+    return {"id": 42, "name": name, "role": role}
+
+create_user("Ada", role="admin")
+```
+
+**Output (pretty mode, success):**
+```
+╭─ 🐛  __main__.create_user ──────────────────╮
+│  file     tests/app.py:5                     │
+│  args     name='Ada'  role='admin'           │
+│  return   {'id': 42, 'name': 'Ada', ...}     │
+│  duration 0.041 ms                           │
+╰──────────────────────────────────────────────╯
+```
+
+**Output when an exception is raised (border turns red 🔴):**
+```
+╭─ 💥  __main__.create_user ──────────────────╮
+│  file     tests/app.py:5                     │
+│  args     name=''  role='admin'              │
+│  raised   ValueError: name cannot be empty   │
+│  duration 0.019 ms                           │
+╰──────────────────────────────────────────────╯
+```
+
+The exception is always re-raised — `@debug` never swallows errors.
+
+---
+
+### Output modes
+
+**simple** — one compact line:
+
+```python
+@debug(mode="simple", label="db.save")
+def save(record: dict) -> bool: ...
+```
+```
+[debug] db.save  |  models.py:88  |  record={'id': 1}  |  → True  |  1.204 ms
+```
+
+---
+
+**json** — structured output for log pipelines:
+
+```python
+@debug(mode="json", label="auth.verify")
+def verify_token(token: str) -> dict: ...
+```
+
+Success:
+```json
+{
+  "name": "auth.verify",
+  "file": "/app/auth.py",
+  "line": 24,
+  "duration_ms": 2.301,
+  "args": { "token": "'eyJ...'" },
+  "return": "{'user_id': 99, 'role': 'admin'}"
+}
+```
+
+Exception:
+```json
+{
+  "name": "auth.verify",
+  "file": "/app/auth.py",
+  "line": 24,
+  "duration_ms": 0.041,
+  "args": { "token": "'invalid'" },
+  "raised": "ValueError: token expired"
+}
+```
+
+---
+
+### Truncating long values
+
+```python
+@debug(max_length=80)  # default is 200
+def process(payload: dict) -> list: ...
+```
+
+Reprs longer than `max_length` are cut with `…`. Useful when args or return values are large objects.
+
+---
+
+### Works with async
+
+```python
+@debug(label="ws.broadcast")
+async def broadcast(message: str, room_id: int) -> int:
+    ...
+```
+
+---
+
+### Use cases for `@debug`
+
+| Scenario | Why it helps |
+|----------|-------------|
+| Unexpected function inputs | See exactly what args arrive at runtime |
+| Tracing bugs in a call chain | No need to add/remove print statements |
+| Checking return values during dev | Is this function returning what I think? |
+| Catching silent exceptions | Exception repr shows up even if caught upstream |
+| Auditing third-party wrappers | Drop it on any callable and see what happens |
+
+---
+
 ## How it works under the hood 🔧
 
 - **`@timer`** uses `time.perf_counter_ns()` for nanosecond precision. Stats are stored in a thread-safe singleton registry, so they accumulate correctly even in multi-threaded apps.
 
 - **`@profile`** combines `time.perf_counter_ns()` for wall time, `time.process_time_ns()` for CPU time, `tracemalloc` for memory, and `threading.active_count()` for threads. Zero extra dependencies — all stdlib.
+
+- **`@debug`** uses `inspect.signature` to bind args by name, `inspect.getfile` + `getsourcelines` for source location, and captures both the return repr and exception repr in a single `DebugRecord` per call.
 
 - **`@timeout`** on Unix/macOS uses `SIGALRM` — which actually interrupts the function mid-execution. On Windows or from a worker thread, it falls back to `concurrent.futures` (the function finishes in the background, but your code moves on).
 
@@ -431,14 +554,16 @@ async def fetch_all(ids: list[int]) -> list[dict]:
 - [x] `@timer` — execution time, stats, percentiles, 3 output modes
 - [x] `@timeout` — sync + async, SIGALRM on Unix, thread fallback
 
-### v0.2 ✅ (current)
+### v0.2 ✅
 - [x] `@profile` — wall time, CPU time, memory delta/peak, thread count
 
-### v0.3
+### v0.3 ✅ (current)
+- [x] `@debug` — arguments, return value, exceptions, source location, duration
+
+### v0.4
 - [ ] `@retry` — attempts, delay, exponential backoff, jitter
 - [ ] `@log` — the main decorator. Args, return value, exceptions, duration, memory
 - [ ] `@trace` — auto call tree: `main → auth → db → save`
-- [ ] `@debug` — dev-mode decorator showing args, return, file + line
 
 ### v0.4
 - [ ] `@cache` — in-memory and disk, with TTL
