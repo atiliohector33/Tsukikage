@@ -12,11 +12,6 @@ from src import timer
 from src.core.registry import timer_registry
 
 
-# ---------------------------------------------------------------------------
-# Basic correctness
-# ---------------------------------------------------------------------------
-
-
 def test_return_value_is_preserved():
     @timer(label="t.return")
     def add(a: int, b: int) -> int:
@@ -54,11 +49,6 @@ def test_label_overrides_qualname():
 
     fn()
     assert timer_registry.get_or_create("custom.label").calls == 1
-
-
-# ---------------------------------------------------------------------------
-# Accumulation & statistics
-# ---------------------------------------------------------------------------
 
 
 def test_stats_accumulate_across_calls():
@@ -108,11 +98,6 @@ def test_percentile_invalid_range():
     assert stats.percentile(100) is None
 
 
-# ---------------------------------------------------------------------------
-# Accessor methods attached to the wrapper
-# ---------------------------------------------------------------------------
-
-
 def test_stats_accessor():
     @timer(label="t.accessor")
     def fn() -> None:
@@ -133,11 +118,6 @@ def test_reset_accessor():
     assert fn.stats().calls == 0
 
 
-# ---------------------------------------------------------------------------
-# Exception transparency: stats recorded even when function raises
-# ---------------------------------------------------------------------------
-
-
 def test_exception_is_reraised():
     @timer(label="t.exc")
     def boom() -> None:
@@ -156,11 +136,6 @@ def test_stats_recorded_on_exception():
         boom()
 
     assert timer_registry.get_or_create("t.exc_stats").calls == 1
-
-
-# ---------------------------------------------------------------------------
-# Render modes (smoke tests — verify no crash)
-# ---------------------------------------------------------------------------
 
 
 def test_simple_mode():
@@ -197,11 +172,11 @@ def test_json_mode_multi_call_includes_stats():
     def fn() -> None:
         pass
 
-    fn()  # first call — no avg yet
+    fn()
 
     old_stderr, sys.stderr = sys.stderr, buf
     try:
-        fn()  # second call — avg/min/max appear
+        fn()
     finally:
         sys.stderr = old_stderr
 
@@ -210,11 +185,6 @@ def test_json_mode_multi_call_includes_stats():
     assert "avg_ms" in data
     assert "min_ms" in data
     assert "max_ms" in data
-
-
-# ---------------------------------------------------------------------------
-# Async support
-# ---------------------------------------------------------------------------
 
 
 async def test_async_return_value():
@@ -246,11 +216,6 @@ async def test_async_exception_reraises_and_records():
     assert timer_registry.get_or_create("t.async_exc").calls == 1
 
 
-# ---------------------------------------------------------------------------
-# functools.wraps preservation
-# ---------------------------------------------------------------------------
-
-
 def test_wraps_preserves_name():
     @timer(label="t.wraps")
     def my_function() -> None:
@@ -261,19 +226,12 @@ def test_wraps_preserves_name():
 
 
 def test_simple_mode_multi_call():
-    """Exercises the avg branch inside SimpleTimerRenderer."""
-
     @timer(mode="simple", label="t.simple_multi")
     def fn() -> None:
         pass
 
     fn()
     fn()
-
-
-# ---------------------------------------------------------------------------
-# _fmt formatting branches (ns and µs ranges)
-# ---------------------------------------------------------------------------
 
 
 def test_fmt_nanoseconds():
@@ -298,11 +256,6 @@ def test_fmt_seconds():
     from src.core.renderer import _fmt
 
     assert "s" in _fmt(2_000_000_000)
-
-
-# ---------------------------------------------------------------------------
-# Registry.all
-# ---------------------------------------------------------------------------
 
 
 def test_registry_all():

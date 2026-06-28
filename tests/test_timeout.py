@@ -8,11 +8,6 @@ import pytest
 from src import TimeoutExpired, timeout
 
 
-# ---------------------------------------------------------------------------
-# Basic correctness
-# ---------------------------------------------------------------------------
-
-
 def test_completes_within_limit():
     @timeout(seconds=2.0)
     def fast() -> int:
@@ -35,11 +30,6 @@ def test_arguments_forwarded():
         return a + b
 
     assert add(10, 32) == 42
-
-
-# ---------------------------------------------------------------------------
-# Timeout fires
-# ---------------------------------------------------------------------------
 
 
 def test_raises_on_slow_function():
@@ -82,11 +72,6 @@ def test_custom_message():
         slow()
 
 
-# ---------------------------------------------------------------------------
-# TimeoutExpired is a subclass of TsukikageError / Exception
-# ---------------------------------------------------------------------------
-
-
 def test_timeout_expired_is_exception():
     exc = TimeoutExpired("fn", 1.0)
     assert isinstance(exc, Exception)
@@ -101,11 +86,6 @@ def test_timeout_expired_str_default():
 def test_timeout_expired_str_custom():
     exc = TimeoutExpired("process", 3.5, "custom msg")
     assert str(exc) == "custom msg"
-
-
-# ---------------------------------------------------------------------------
-# Async support
-# ---------------------------------------------------------------------------
 
 
 async def test_async_completes_within_limit():
@@ -146,11 +126,6 @@ async def test_async_exception_carries_seconds():
     assert exc_info.value.seconds == 0.1
 
 
-# ---------------------------------------------------------------------------
-# functools.wraps preservation
-# ---------------------------------------------------------------------------
-
-
 def test_wraps_preserves_name():
     @timeout(seconds=1.0)
     def documented() -> None:
@@ -169,13 +144,7 @@ async def test_async_wraps_preserves_name():
     assert async_fn.__doc__ == "Async docstring."
 
 
-# ---------------------------------------------------------------------------
-# Thread-based path (non-main thread, forces _run_with_thread)
-# ---------------------------------------------------------------------------
-
-
 def test_thread_path_completes():
-    """_run_with_thread is used when called from a worker thread."""
     import threading
 
     @timeout(seconds=2.0)
@@ -200,7 +169,6 @@ def test_thread_path_completes():
 
 
 def test_thread_path_raises_on_slow():
-    """_run_with_thread raises TimeoutExpired when the deadline is exceeded."""
     import threading
     import time
 

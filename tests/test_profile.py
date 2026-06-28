@@ -11,21 +11,11 @@ from src import profile
 from src.core.registry import profile_registry
 
 
-# ---------------------------------------------------------------------------
-# Isolation
-# ---------------------------------------------------------------------------
-
-
 @pytest.fixture(autouse=True)
 def reset_profile_registry():
     profile_registry.reset()
     yield
     profile_registry.reset()
-
-
-# ---------------------------------------------------------------------------
-# Basic correctness
-# ---------------------------------------------------------------------------
 
 
 def test_return_value_preserved():
@@ -64,11 +54,6 @@ def test_label_overrides_qualname():
 
     fn()
     assert profile_registry.get_or_create("custom.profile").calls == 1
-
-
-# ---------------------------------------------------------------------------
-# Snapshot fields
-# ---------------------------------------------------------------------------
 
 
 def test_snapshot_has_cpu_time():
@@ -132,11 +117,6 @@ def test_snapshot_has_thread_counts():
     assert snapshot.threads_after >= 1
 
 
-# ---------------------------------------------------------------------------
-# Accumulation
-# ---------------------------------------------------------------------------
-
-
 def test_calls_accumulate():
     @profile(label="p.accum")
     def fn() -> None:
@@ -163,11 +143,6 @@ def test_avg_duration_available_after_multiple_calls():
     assert stats.avg_memory_delta_bytes is not None
 
 
-# ---------------------------------------------------------------------------
-# Accessor methods
-# ---------------------------------------------------------------------------
-
-
 def test_stats_accessor():
     @profile(label="p.acc")
     def fn() -> None:
@@ -188,11 +163,6 @@ def test_reset_accessor():
     assert fn.stats().calls == 0
 
 
-# ---------------------------------------------------------------------------
-# Exception transparency
-# ---------------------------------------------------------------------------
-
-
 def test_exception_is_reraised():
     @profile(label="p.exc")
     def boom() -> None:
@@ -211,11 +181,6 @@ def test_stats_recorded_on_exception():
         boom()
 
     assert profile_registry.get_or_create("p.exc_stats").calls == 1
-
-
-# ---------------------------------------------------------------------------
-# Render modes
-# ---------------------------------------------------------------------------
 
 
 def test_simple_mode():
@@ -280,11 +245,6 @@ def test_json_mode_multi_call_includes_avgs():
     assert "avg_cpu_ms" in data
 
 
-# ---------------------------------------------------------------------------
-# Async support
-# ---------------------------------------------------------------------------
-
-
 async def test_async_return_value():
     @profile(label="p.async")
     async def fetch() -> int:
@@ -314,11 +274,6 @@ async def test_async_exception_reraises_and_records():
     assert profile_registry.get_or_create("p.async_exc").calls == 1
 
 
-# ---------------------------------------------------------------------------
-# functools.wraps preservation
-# ---------------------------------------------------------------------------
-
-
 def test_wraps_preserves_name():
     @profile(label="p.wraps")
     def documented() -> None:
@@ -326,11 +281,6 @@ def test_wraps_preserves_name():
 
     assert documented.__name__ == "documented"
     assert documented.__doc__ == "Important function."
-
-
-# ---------------------------------------------------------------------------
-# Renderer helpers (_fmt_bytes, _fmt_bytes_delta)
-# ---------------------------------------------------------------------------
 
 
 def test_fmt_bytes_b():
