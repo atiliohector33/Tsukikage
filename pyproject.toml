@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tsukikage"
-version = "0.2.0"
+version = "0.3.0"
 description = "One decorator. Total visibility."
 authors = ["Atilio Hector <thehacktour@gmail.com>"]
 license = "MIT"
