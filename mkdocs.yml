@@ -1,0 +1,34 @@
+site_name: Tsukikage
+site_description: One decorator. Total visibility.
+site_url: https://thehecktour.github.io/Tsukikage
+repo_url: https://github.com/thehecktour/Tsukikage
+repo_name: thehecktour/Tsukikage
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep purple
+    accent: amber
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+
+nav:
+  - Home: index.md
+  - Decorators:
+    - timer: decorators/timer.md
+    - timeout: decorators/timeout.md
+    - profile: decorators/profile.md
+    - debug: decorators/debug.md
+  - Roadmap: roadmap.md
