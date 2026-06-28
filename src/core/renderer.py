@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 if TYPE_CHECKING:
-    from .models import TimerStats
+    from .models import ProfileSnapshot, ProfileStats, TimerStats
 
 RenderMode = Literal["simple", "pretty", "json"]
 
@@ -97,3 +97,100 @@ def get_renderer(mode: RenderMode) -> BaseTimerRenderer:
             return JsonTimerRenderer()
         case _:
             return PrettyTimerRenderer()
+
+def _fmt_bytes(b: int | float) -> str:
+    """Format bytes as a human-readable string."""
+    b = float(b)
+    if abs(b) < 1024:
+        return f"{b:.0f} B"
+    if abs(b) < 1024 ** 2:
+        return f"{b / 1024:.2f} KB"
+    return f"{b / 1024 ** 2:.2f} MB"
+
+
+def _fmt_bytes_delta(b: int | float) -> str:
+    prefix = "+" if b >= 0 else ""
+    return f"{prefix}{_fmt_bytes(b)}"
+
+
+class BaseProfileRenderer(ABC):
+    """Strategy interface for profile output rendering."""
+
+    @abstractmethod
+    def render(self, stats: ProfileStats, snapshot: ProfileSnapshot) -> None: ...
+
+
+class SimpleProfileRenderer(BaseProfileRenderer):
+    def render(self, stats: ProfileStats, snapshot: ProfileSnapshot) -> None:
+        parts = [
+            f"[profile] {stats.name}",
+            f"duration={_fmt(snapshot.duration_ns)}",
+            f"cpu={_fmt(snapshot.cpu_ns)}",
+            f"mem={_fmt_bytes_delta(snapshot.memory_delta_bytes)}",
+            f"peak={_fmt_bytes(snapshot.memory_peak_bytes)}",
+            f"threads={snapshot.threads_before}→{snapshot.threads_after}",
+            f"calls={stats.calls}",
+        ]
+        print("  ".join(parts), file=sys.stderr)
+
+
+class PrettyProfileRenderer(BaseProfileRenderer):
+    def render(self, stats: ProfileStats, snapshot: ProfileSnapshot) -> None:
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column(style="dim", no_wrap=True)
+        table.add_column(style="bold magenta", no_wrap=True)
+
+        table.add_row("duration", _fmt(snapshot.duration_ns))
+        table.add_row("cpu time", _fmt(snapshot.cpu_ns))
+        table.add_row("memory delta", _fmt_bytes_delta(snapshot.memory_delta_bytes))
+        table.add_row("memory peak", _fmt_bytes(snapshot.memory_peak_bytes))
+        table.add_row(
+            "threads",
+            f"{snapshot.threads_before} → {snapshot.threads_after}",
+        )
+        table.add_row("calls", str(stats.calls))
+
+        if stats.calls > 1:
+            table.add_section()
+            if stats.avg_duration_ns is not None:
+                table.add_row("avg duration", _fmt(stats.avg_duration_ns))
+            if stats.avg_cpu_ns is not None:
+                table.add_row("avg cpu", _fmt(stats.avg_cpu_ns))
+
+        _console.print(
+            Panel(
+                table,
+                title=f"[magenta]📊  {stats.name}[/magenta]",
+                border_style="magenta",
+            )
+        )
+
+
+class JsonProfileRenderer(BaseProfileRenderer):
+    def render(self, stats: ProfileStats, snapshot: ProfileSnapshot) -> None:
+        data: dict[str, object] = {
+            "name": stats.name,
+            "calls": stats.calls,
+            "duration_ms": snapshot.duration_ns / 1_000_000,
+            "cpu_ms": snapshot.cpu_ns / 1_000_000,
+            "memory_delta_bytes": snapshot.memory_delta_bytes,
+            "memory_peak_bytes": snapshot.memory_peak_bytes,
+            "threads_before": snapshot.threads_before,
+            "threads_after": snapshot.threads_after,
+        }
+        if stats.calls > 1:
+            if stats.avg_duration_ns is not None:
+                data["avg_duration_ms"] = stats.avg_duration_ns / 1_000_000
+            if stats.avg_cpu_ns is not None:
+                data["avg_cpu_ms"] = stats.avg_cpu_ns / 1_000_000
+        print(json.dumps(data), file=sys.stderr)
+
+
+def get_profile_renderer(mode: RenderMode) -> BaseProfileRenderer:
+    match mode:
+        case "simple":
+            return SimpleProfileRenderer()
+        case "json":
+            return JsonProfileRenderer()
+        case _:
+            return PrettyProfileRenderer()
