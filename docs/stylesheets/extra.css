@@ -1,0 +1,68 @@
+/* Hero section */
+.hero {
+  padding: 2rem 0 1rem;
+  text-align: center;
+}
+
+.hero pre {
+  display: inline-block;
+  text-align: left;
+  font-size: 0.65em;
+  line-height: 1.3;
+  color: var(--md-primary-fg-color);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.hero-tagline {
+  font-size: 1.15rem;
+  color: var(--md-default-fg-color--light);
+  margin: 0.5rem 0 1.5rem;
+  font-style: italic;
+}
+
+/* Badge strip */
+.badge-strip {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1.2rem 0;
+}
+
+/* Output block — monospaced terminal feel */
+.terminal {
+  background: #1a1a2e;
+  border-left: 3px solid var(--md-primary-fg-color);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.82em;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+
+.terminal .dim  { color: #718096; }
+.terminal .grn  { color: #68d391; }
+.terminal .yel  { color: #f6e05e; }
+.terminal .red  { color: #fc8181; }
+.terminal .mag  { color: #d6bcfa; }
+.terminal .cyn  { color: #76e4f7; }
+
+/* Decorator title chips */
+.decorator-chip {
+  display: inline-block;
+  background: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  border-radius: 4px;
+  padding: 0.1rem 0.6rem;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* API reference table */
+.api-table th { white-space: nowrap; }
+.api-table td:nth-child(2) { font-family: "JetBrains Mono", monospace; font-size: 0.85em; }
