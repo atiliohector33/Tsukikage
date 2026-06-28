@@ -31,16 +31,6 @@ def timer(
     mode: RenderMode = "pretty",
     label: str | None = None,
 ) -> F | Callable[[F], F]:
-    """Measure and report the execution time of a function.
-
-    Works as a bare decorator (@timer) or with options (@timer(mode="json")).
-    Stats accumulate across calls and are accessible via func.stats().
-
-    Parameters:
-        mode: Output format — "pretty" (rich panel), "simple" (plain), or "json".
-        label: Display name. Defaults to "<module>.<qualname>".
-    """
-
     def decorator(fn: F) -> F:
         name = label or f"{fn.__module__}.{fn.__qualname__}"
         renderer = get_renderer(mode)

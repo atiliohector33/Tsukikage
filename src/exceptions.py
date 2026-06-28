@@ -2,12 +2,10 @@ from __future__ import annotations
 
 
 class TsukikageError(Exception):
-    """Base exception for all tsukikage errors."""
+    pass
 
 
 class TimeoutExpired(TsukikageError):
-    """Raised when a function exceeds its allowed execution time."""
-
     def __init__(
         self,
         func_name: str,

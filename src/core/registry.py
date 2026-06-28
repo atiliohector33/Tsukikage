@@ -6,12 +6,6 @@ from .models import ProfileStats, TimerStats
 
 
 class _TimerRegistry:
-    """Thread-safe singleton that owns all TimerStats instances.
-
-    Uses double-checked locking so the fast path (instance exists)
-    never acquires the class-level lock.
-    """
-
     _instance: _TimerRegistry | None = None
     _init_lock: Lock = Lock()
 
@@ -48,8 +42,6 @@ timer_registry: _TimerRegistry = _TimerRegistry()
 
 
 class _ProfileRegistry:
-    """Thread-safe singleton that owns all ProfileStats instances."""
-
     _instance: _ProfileRegistry | None = None
     _init_lock: Lock = Lock()
 

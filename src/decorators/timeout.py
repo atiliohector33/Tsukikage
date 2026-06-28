@@ -15,7 +15,6 @@ F = TypeVar("F", bound=Callable[..., object])
 
 
 def _can_use_signals() -> bool:
-    """SIGALRM is available on Unix and only from the main thread."""
     return (
         sys.platform != "win32"
         and threading.current_thread() is threading.main_thread()
@@ -46,11 +45,6 @@ def _run_with_thread(
     args: tuple[object, ...],
     kwargs: dict[str, object],
 ) -> object:
-    """Thread-based fallback for Windows and non-main threads.
-
-    The underlying call continues in the background after the timeout —
-    Python threads cannot be forcefully killed.
-    """
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     future = executor.submit(fn, *args, **kwargs)
     try:
@@ -66,19 +60,6 @@ def timeout(
     *,
     message: str | None = None,
 ) -> Callable[[F], F]:
-    """Abort a function that exceeds the given time limit.
-
-    Raises TimeoutExpired when the deadline is exceeded.
-
-    On Unix in the main thread, SIGALRM provides true interruption.
-    In other contexts (worker threads, Windows), a thread-based approach is
-    used — the underlying call continues in the background until it completes.
-
-    Parameters:
-        seconds: Maximum allowed execution time in seconds.
-        message: Custom message for the TimeoutExpired exception.
-    """
-
     def decorator(fn: F) -> F:
         if inspect.iscoroutinefunction(fn):
             @functools.wraps(fn)

@@ -1,6 +1,7 @@
-from .models import DebugRecord, ProfileSnapshot, ProfileStats, TimerStats
+from .models import ProfileSnapshot, ProfileStats, TimerStats
 from .registry import profile_registry, timer_registry
 from .renderer import RenderMode
+from ..debug.record import DebugRecord
 
 __all__ = [
     "DebugRecord",

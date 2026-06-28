@@ -20,10 +20,6 @@ def _start_tracing() -> None:
 
 
 def _snapshot_before() -> tuple[int, int, int, int]:
-    """Capture baseline metrics just before the call.
-
-    Returns (wall_ns, cpu_ns, mem_before_bytes, threads_before).
-    """
     _start_tracing()
     tracemalloc.reset_peak()
     mem_before = tracemalloc.get_traced_memory()[0]
@@ -40,7 +36,6 @@ def _snapshot_after(
     mem_before: int,
     threads_before: int,
 ) -> ProfileSnapshot:
-    """Capture metrics immediately after the call and build a ProfileSnapshot."""
     wall_end = time.perf_counter_ns()
     cpu_end = time.process_time_ns()
     mem_after, mem_peak = tracemalloc.get_traced_memory()
@@ -77,21 +72,6 @@ def profile(
     mode: RenderMode = "pretty",
     label: str | None = None,
 ) -> F | Callable[[F], F]:
-    """Measure time, CPU, memory, and thread count for a function.
-
-    Works as a bare decorator (@profile) or with options (@profile(mode="json")).
-    Snapshots accumulate across calls and are accessible via func.stats().
-
-    Parameters:
-        mode: Output format — "pretty" (rich panel), "simple" (plain), or "json".
-        label: Display name. Defaults to "<module>.<qualname>".
-
-    Note:
-        Memory is measured via tracemalloc (Python-level allocations only).
-        CPU time uses process_time_ns (user + kernel). In async contexts both
-        metrics include other coroutines running concurrently on the event loop.
-    """
-
     def decorator(fn: F) -> F:
         name = label or f"{fn.__module__}.{fn.__qualname__}"
         renderer = get_profile_renderer(mode)
