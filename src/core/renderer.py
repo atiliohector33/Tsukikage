@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from rich.console import Console
@@ -10,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 if TYPE_CHECKING:
-    from .models import ProfileSnapshot, ProfileStats, TimerStats
+    from .models import DebugRecord, ProfileSnapshot, ProfileStats, TimerStats
 
 RenderMode = Literal["simple", "pretty", "json"]
 
@@ -194,3 +195,99 @@ def get_profile_renderer(mode: RenderMode) -> BaseProfileRenderer:
             return JsonProfileRenderer()
         case _:
             return PrettyProfileRenderer()
+
+
+# ---------------------------------------------------------------------------
+# Debug renderers
+# ---------------------------------------------------------------------------
+
+
+def _display_file(file: str) -> str:
+    """Return a short, readable file path relative to cwd when possible."""
+    try:
+        return str(Path(file).relative_to(Path.cwd()))
+    except ValueError:
+        return Path(file).name
+
+
+class BaseDebugRenderer(ABC):
+    """Strategy interface for debug output rendering."""
+
+    @abstractmethod
+    def render(self, record: DebugRecord) -> None: ...
+
+
+class SimpleDebugRenderer(BaseDebugRenderer):
+    def render(self, record: DebugRecord) -> None:
+        file_display = _display_file(record.file)
+        parts = [f"[debug] {record.name}", f"{file_display}:{record.line}"]
+
+        if record.args_repr:
+            parts.append("  ".join(f"{k}={v}" for k, v in record.args_repr.items()))
+
+        if record.raised:
+            parts.append(f"💥 {record.exception_repr}")
+        else:
+            parts.append(f"→ {record.return_repr}")
+
+        parts.append(_fmt(record.duration_ns))
+        print("  |  ".join(parts), file=sys.stderr)
+
+
+class PrettyDebugRenderer(BaseDebugRenderer):
+    def render(self, record: DebugRecord) -> None:
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column(style="dim", no_wrap=True)
+        table.add_column(no_wrap=False, max_width=80)
+
+        file_display = _display_file(record.file)
+        table.add_row("file", f"[dim]{file_display}:{record.line}[/dim]")
+
+        if record.args_repr:
+            args_parts = [f"[yellow]{k}[/yellow]={v}" for k, v in record.args_repr.items()]
+            table.add_row("args", "  ".join(args_parts))
+        else:
+            table.add_row("args", "[dim]—[/dim]")
+
+        if record.raised:
+            table.add_row("raised", f"[bold red]{record.exception_repr}[/bold red]")
+        else:
+            table.add_row("return", f"[green]{record.return_repr}[/green]")
+
+        table.add_row("duration", _fmt(record.duration_ns))
+
+        border = "red" if record.raised else "yellow"
+        icon = "💥" if record.raised else "🐛"
+        _console.print(
+            Panel(
+                table,
+                title=f"[{border}]{icon}  {record.name}[/{border}]",
+                border_style=border,
+            )
+        )
+
+
+class JsonDebugRenderer(BaseDebugRenderer):
+    def render(self, record: DebugRecord) -> None:
+        data: dict[str, object] = {
+            "name": record.name,
+            "file": record.file,
+            "line": record.line,
+            "duration_ms": record.duration_ns / 1_000_000,
+            "args": record.args_repr,
+        }
+        if record.raised:
+            data["raised"] = record.exception_repr
+        else:
+            data["return"] = record.return_repr
+        print(json.dumps(data), file=sys.stderr)
+
+
+def get_debug_renderer(mode: RenderMode) -> BaseDebugRenderer:
+    match mode:
+        case "simple":
+            return SimpleDebugRenderer()
+        case "json":
+            return JsonDebugRenderer()
+        case _:
+            return PrettyDebugRenderer()
