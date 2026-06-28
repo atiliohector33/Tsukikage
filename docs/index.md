@@ -71,7 +71,7 @@ That's all the importing you'll ever need to do.
 
     ---
 
-    See inside every call. Args by name, return repr, exception, file, line, duration. No `print()` needed.
+    Built for multi-service backends. Args, return, exception, thread, task, **trace ID**, span ID, call depth, slow flag, redaction, full traceback, caller info, sampling, and logger routing.
 
     [:octicons-arrow-right-24: Read the docs](decorators/debug.md)
 
@@ -108,6 +108,7 @@ That's all the importing you'll ever need to do.
 
 ```python
 from tsukikage import timer, debug, profile, timeout, TimeoutExpired
+from tsukikage import set_trace_id, clear_trace_id
 import time
 
 # ── time a function ────────────────────────────────────────────────────────
@@ -116,15 +117,23 @@ def fetch_user(user_id: int) -> dict:
     time.sleep(0.04)
     return {"id": user_id, "name": "Ada Lovelace"}
 
-fetch_user(1)  # pretty panel printed to stderr
-fetch_user(2)  # now shows avg, min, max
+fetch_user(1)   # pretty panel to stderr
+fetch_user(2)   # now shows avg, min, max, p50, p95
 
-# ── inspect every call ─────────────────────────────────────────────────────
-@debug
+# ── inspect every call, distributed-tracing style ─────────────────────────
+set_trace_id("req-abc123")   # set once in your request middleware
+
+@debug(label="auth.validate", redact=["password"])
+def validate(username: str, password: str) -> dict:
+    return {"user": username, "ok": True}
+
+@debug(label="orders.create", slow_threshold_ms=50.0)
 def create_order(item: str, qty: int = 1) -> dict:
     return {"item": item, "qty": qty, "total": qty * 9.99}
 
-create_order("widget", qty=3)
+validate("ada", password="s3cr3t")  # password shown as ***
+create_order("widget", qty=3)       # slow flag if > 50 ms
+clear_trace_id()
 
 # ── profile memory + cpu ───────────────────────────────────────────────────
 @profile
@@ -141,7 +150,7 @@ def call_api() -> dict:
 try:
     call_api()
 except TimeoutExpired as e:
-    print(e)  # "upstream took too long"
+    print(e)   # "upstream took too long"
 ```
 
 ---

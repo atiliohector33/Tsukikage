@@ -14,4 +14,4 @@ Pick the one you need:
 | [`@timer`](timer.md) | Execution time, accumulated statistics | ✅ yes |
 | [`@timeout`](timeout.md) | Hard time limit — raises `TimeoutExpired` | — |
 | [`@profile`](profile.md) | Time + CPU + memory + threads | ✅ yes |
-| [`@debug`](debug.md) | Args, return, exceptions, file/line | — |
+| [`@debug`](debug.md) | Args, return, exception, file/line, thread, task, trace ID, span ID, call depth, slow flag, redaction, traceback, caller, sampling, logger routing | — |
